@@ -8,7 +8,7 @@ function App() {
   return (
     <BrowserRouter>
       <Switch>
-        <Route path="/cart" component={ ShoppingCart} />
+        <Route path="/cart" component={ ShoppingCart } />
         <Route exact path="/" component={ Home } />
 
       </Switch>
