@@ -56,6 +56,9 @@ class Home extends Component {
           image={ product.thumbnail }
           price={ product.price }
         />
+        <Link to={ `/product-details/${product.id}` } data-testid="product-detail-link">
+          Mais detalhes
+        </Link>
       </div>
     ));
 
