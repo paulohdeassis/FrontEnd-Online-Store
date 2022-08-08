@@ -8,6 +8,7 @@ class Home extends Component {
     listCategories: [],
     listProducts: [],
     searchField: '',
+    category: '',
   };
 
   componentDidMount() {
@@ -21,9 +22,18 @@ class Home extends Component {
     });
   }
 
+  handleRadioChange = ({ target }) => {
+    const { name, value } = target;
+    this.setState({
+      [name]: value,
+    }, () => {
+      this.handleClick();
+    });
+  }
+
   handleClick = async () => {
-    const { searchProduct } = this.state;
-    const product = await getProductsFromCategoryAndQuery(searchProduct);
+    const { searchField, category } = this.state;
+    const product = await getProductsFromCategoryAndQuery(searchField, category);
     const listProducts = product.results;
     this.setState({
       listProducts,
@@ -70,16 +80,19 @@ class Home extends Component {
         <Link to="/cart" data-testid="shopping-cart-button">Carrinho de compras</Link>
         Categorias:
         {listCategories.map((category) => (
-          <label htmlFor="categories" key={ category.id } data-testid="category">
+          <label htmlFor="category" key={ category.id } data-testid="category">
             {category.name}
             <input
               type="radio"
+              id="category"
               name="category"
+              value={ category.id }
+              onChange={ this.handleRadioChange }
             />
           </label>
         ))}
 
-        { searchField ? list : <p>Nenhum produto foi encontrado</p>}
+        { listProducts.length > 0 ? list : <p>Nenhum produto foi encontrado</p>}
       </div>
     );
   }
