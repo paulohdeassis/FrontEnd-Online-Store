@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { getSpecificProduct } from '../services/api';
+import { addProduct } from '../services/shoppingCartApi';
 
 class ProductDetails extends Component {
   constructor() {
@@ -16,6 +17,10 @@ class ProductDetails extends Component {
     this.getProductDetails();
   }
 
+  addToCart = async (product) => {
+    await addProduct(product);
+  }
+
   getProductDetails = async () => {
     const { match: { params: { id } } } = this.props;
     const productDetails = await getSpecificProduct(id);
@@ -26,6 +31,7 @@ class ProductDetails extends Component {
     const { productDetails } = this.state;
     return (
       <div className="details-container">
+        <Link to="/cart" data-testid="shopping-cart-button"> Carrinho de Compras</Link>
         <div className="details-left">
           <p data-testid="product-detail-name">{ productDetails.title }</p>
           <img
@@ -38,11 +44,15 @@ class ProductDetails extends Component {
           <p data-testid="product-detail-price">
             { productDetails.price }
           </p>
-          <Link to="/cart" data-testid="shopping-cart-button">
-            <button type="button">
-              Adicionar ao Carrinho
-            </button>
-          </Link>
+
+          <button
+            data-testid="product-detail-add-to-cart"
+            type="button"
+            onClick={ () => this.addToCart(productDetails) }
+          >
+            Adicionar ao Carrinho
+          </button>
+
         </div>
       </div>
     );

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { getCategories, getProductsFromCategoryAndQuery } from '../services/api';
 import ProductsCard from '../components/ProductsCard';
+import { addProduct } from '../services/shoppingCartApi';
 
 class Home extends Component {
   state = {
@@ -40,65 +41,76 @@ class Home extends Component {
     });
   }
 
-  async createListCategories() {
-    const categories = await getCategories();
-    this.setState({
-      listCategories: categories,
-    });
-  }
+   addToCart = async (product) => {
+     await addProduct(product);
+   }
 
-  render() {
-    const { listCategories, listProducts, searchField } = this.state;
-    const list = listProducts.map((product) => (
-      <div data-testid="product" key={ product.id }>
-        <ProductsCard
-          name={ product.title }
-          image={ product.thumbnail }
-          price={ product.price }
-        />
-        <Link to={ `/product-details/${product.id}` } data-testid="product-detail-link">
-          Mais detalhes
-        </Link>
-      </div>
-    ));
+   async createListCategories() {
+     const categories = await getCategories();
+     this.setState({
+       listCategories: categories,
+     });
+   }
 
-    return (
-      <div className="search">
-        <input
-          data-testid="query-input"
-          type="text"
-          name="searchField"
-          onChange={ this.handleChange }
-          value={ searchField }
-        />
+   render() {
+     const { listCategories, listProducts, searchField } = this.state;
+     const list = listProducts.map((product) => (
+       <div data-testid="product" key={ product.id }>
+         <ProductsCard
+           name={ product.title }
+           image={ product.thumbnail }
+           price={ product.price }
+         />
+         <button
+           data-testid="product-add-to-cart"
+           type="button"
+           onClick={ () => this.addToCart(product) }
+         >
+           Adicionar ao carrinho
+         </button>
+         <Link to={ `/product-details/${product.id}` } data-testid="product-detail-link">
+           Mais detalhes
+         </Link>
+       </div>
+     ));
 
-        <button data-testid="query-button" type="button" onClick={ this.handleClick }>
-          Pesquisar Produto
-        </button>
+     return (
+       <div className="search">
+         <input
+           data-testid="query-input"
+           type="text"
+           name="searchField"
+           onChange={ this.handleChange }
+           value={ searchField }
+         />
 
-        <div data-testid="home-initial-message">
-          Digite algum termo de pesquisa ou escolha uma categoria.
-        </div>
+         <button data-testid="query-button" type="button" onClick={ this.handleClick }>
+           Pesquisar Produto
+         </button>
 
-        <Link to="/cart" data-testid="shopping-cart-button">Carrinho de compras</Link>
-        Categorias:
-        {listCategories.map((category) => (
-          <label htmlFor="category" key={ category.id } data-testid="category">
-            {category.name}
-            <input
-              type="radio"
-              id="category"
-              name="category"
-              value={ category.id }
-              onChange={ this.handleRadioChange }
-            />
-          </label>
-        ))}
+         <div data-testid="home-initial-message">
+           Digite algum termo de pesquisa ou escolha uma categoria.
+         </div>
 
-        { listProducts.length > 0 ? list : <p>Nenhum produto foi encontrado</p>}
-      </div>
-    );
-  }
+         <Link to="/cart" data-testid="shopping-cart-button">Carrinho de compras</Link>
+         Categorias:
+         {listCategories.map((category) => (
+           <label htmlFor="category" key={ category.id } data-testid="category">
+             {category.name}
+             <input
+               type="radio"
+               id="category"
+               name="category"
+               value={ category.id }
+               onChange={ this.handleRadioChange }
+             />
+           </label>
+         ))}
+
+         { listProducts.length > 0 ? list : <p>Nenhum produto foi encontrado</p>}
+       </div>
+     );
+   }
 }
 
 export default Home;
