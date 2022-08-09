@@ -1,5 +1,5 @@
 const SHOPPING_CART_KEY = 'shopping_cart';
-const TIMEOUT = 500;
+const TIMEOUT = 0;
 const SUCCESS_STATUS = 'OK';
 
 if (!JSON.parse(localStorage.getItem(SHOPPING_CART_KEY))) {
@@ -37,6 +37,14 @@ export const addProduct = (product) => new Promise((resolve) => {
 });
 
 export const removeProduct = (product) => new Promise((resolve) => {
+  const shoppingCart = readShoppingCart();
+  const index = shoppingCart.findIndex((p) => p.id === product.id);
+  shoppingCart.splice(index, 1);
+  saveShoppingCart(shoppingCart);
+  simulateRequest(SUCCESS_STATUS)(resolve);
+});
+
+export const removeAllProducts = (product) => new Promise((resolve) => {
   const shoppingCart = readShoppingCart();
   saveShoppingCart(shoppingCart.filter((p) => p.id !== product.id));
   simulateRequest(SUCCESS_STATUS)(resolve);
