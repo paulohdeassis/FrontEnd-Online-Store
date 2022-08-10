@@ -1,5 +1,6 @@
 import React from 'react';
-import { getShoppingCart } from '../services/shoppingCartApi';
+import { getShoppingCart, removeProduct, addProduct, removeAllProducts,
+} from '../services/shoppingCartApi';
 
 class ShoppingCart extends React.Component {
   state = {
@@ -10,9 +11,49 @@ class ShoppingCart extends React.Component {
     this.dispatchGetShoppingCart();
   }
 
+  removeAllProducts = async (product) => {
+    this.setState(({ cart }) => ({
+      cart: cart.filter((p) => p.id !== product.id),
+    }));
+    await removeAllProducts(product);
+  }
+
+  addProduct = async (i) => {
+    const { cart } = this.state;
+    const product = { ...cart[i] };
+    product.quantity += 1;
+    cart[i] = product;
+    this.setState({ ...cart });
+    await addProduct(product);
+  }
+
+  removeProduct = async (i) => {
+    const { cart } = this.state;
+    const product = { ...cart[i] };
+    if (product.quantity !== 1) {
+      product.quantity -= 1;
+      cart[i] = product;
+      this.setState({ ...cart });
+      await removeProduct(product);
+    }
+  }
+
   dispatchGetShoppingCart = async () => {
     const cart = await getShoppingCart();
-    this.setState({ cart });
+    const newCart = cart.reduce((cartAcc, product) => {
+      const item = cartAcc.find((p) => p.id === product.id);
+      if (item) {
+        item.quantity += 1;
+      } else {
+        cartAcc.push({
+          ...product,
+          quantity: 1,
+        });
+      }
+
+      return cartAcc;
+    }, []);
+    this.setState({ cart: newCart });
   }
 
   render() {
@@ -24,19 +65,41 @@ class ShoppingCart extends React.Component {
           <div data-testid="shopping-cart-empty-message">
             Seu carrinho está vazio
           </div>)}
-        { cart.map((product) => (
+        { cart.map((product, i) => (
           <div key={ product.id }>
             <span data-testid="shopping-cart-product-name">{ product.title }</span>
-            <span data-testid="shopping-cart-product-quantity">{ 1 }</span>
+
+            <button
+              data-testid="product-decrease-quantity"
+              type="button"
+              onClick={ () => this.removeProduct(i) }
+            >
+              -
+            </button>
+
+            <span data-testid="shopping-cart-product-quantity">{ product.quantity }</span>
+            <button
+              data-testid="product-increase-quantity"
+              type="button"
+              onClick={ () => this.addProduct(i) }
+              disabled={ product.available_quantity <= product.quantity }
+            >
+              +
+            </button>
+
+            <button
+              data-testid="remove-product"
+              type="button"
+              onClick={ () => this.removeAllProducts(product) }
+            >
+              x
+            </button>
+
           </div>
         ))}
       </div>
     );
   }
 }
-
-ShoppingCart.propTypes = {
-
-};
 
 export default ShoppingCart;
