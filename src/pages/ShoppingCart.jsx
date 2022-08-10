@@ -12,18 +12,30 @@ class ShoppingCart extends React.Component {
   }
 
   removeAllProducts = async (product) => {
+    this.setState(({ cart }) => ({
+      cart: cart.filter((p) => p.id !== product.id),
+    }));
     await removeAllProducts(product);
-    this.dispatchGetShoppingCart();
   }
 
-  addProduct = async (product) => {
+  addProduct = async (i) => {
+    const { cart } = this.state;
+    const product = { ...cart[i] };
+    product.quantity += 1;
+    cart[i] = product;
+    this.setState({ ...cart });
     await addProduct(product);
-    this.dispatchGetShoppingCart();
   }
 
-  removeProduct = async (product) => {
-    await removeProduct(product);
-    this.dispatchGetShoppingCart();
+  removeProduct = async (i) => {
+    const { cart } = this.state;
+    const product = { ...cart[i] };
+    if (product.quantity !== 1) {
+      product.quantity -= 1;
+      cart[i] = product;
+      this.setState({ ...cart });
+      await removeProduct(product);
+    }
   }
 
   dispatchGetShoppingCart = async () => {
@@ -53,14 +65,14 @@ class ShoppingCart extends React.Component {
           <div data-testid="shopping-cart-empty-message">
             Seu carrinho está vazio
           </div>)}
-        { cart.map((product) => (
+        { cart.map((product, i) => (
           <div key={ product.id }>
             <span data-testid="shopping-cart-product-name">{ product.title }</span>
 
             <button
               data-testid="product-decrease-quantity"
               type="button"
-              onClick={ () => this.removeProduct(product) }
+              onClick={ () => this.removeProduct(i) }
             >
               -
             </button>
@@ -69,7 +81,7 @@ class ShoppingCart extends React.Component {
             <button
               data-testid="product-increase-quantity"
               type="button"
-              onClick={ () => this.addProduct(product) }
+              onClick={ () => this.addProduct(i) }
             >
               +
             </button>
