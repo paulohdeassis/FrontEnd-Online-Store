@@ -60,6 +60,7 @@ class Home extends Component {
            name={ product.title }
            image={ product.thumbnail }
            price={ product.price }
+           freeShipping={ product.shipping.free_shipping }
          />
          <button
            data-testid="product-add-to-cart"
